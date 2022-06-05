@@ -1,5 +1,5 @@
 import dbConnect from '../../../lib/dbConnect'
-import Algorithm from '../../../models/Algorithms'
+import Algorithm from '../../../models/algorithms'
   
 export default async function handler(req, res) {
     const {
