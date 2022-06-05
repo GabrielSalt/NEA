@@ -88,7 +88,7 @@ function Problems({ formId, problemForm }){
              <input type='text' name='testcase3' value={form.testcase3}
           onChange={handleChange}></input>
              <br></br>
-             Hint1 ('Hint')
+             Hint1
              <input type='text' name='hint1' value={form.hint1}
           onChange={handleChange}></input>
              <br></br>

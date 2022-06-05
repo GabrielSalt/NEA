@@ -5,8 +5,8 @@ export default function NavBar ({ selected }) {
     const options = ['Home', 'Algorithms', 'Code Problems', 'Quizzes', 'Lessons', 'My Classes', 'Assignments']
     return(
     <div >
-        {options.map((box) => (
-            <div>
+        {options.map((box, key) => (
+            <div id={key}>
                 <h1> {box.name} </h1>
                 <h2> {box.category} {box.class} {box.subject} </h2>
                 <h3> {box.difficulty} </h3>
