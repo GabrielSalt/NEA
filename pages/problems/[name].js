@@ -53,8 +53,8 @@ export default function Problem( { problem, author }) {
                 <h1> {problem.name} </h1>
                 <h5> {author.name} - {problem.datePublished.split("T")[0]} </h5>
                 <h2> {problem.category} </h2>
-                {problem.description.split('\n').map((item, key) => (
-                    <span id={key}>
+                {problem.description.split('\n').map((item, index) => (
+                    <span key={index}>
                         {item}
                         <br/>
                     </span>

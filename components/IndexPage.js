@@ -4,8 +4,8 @@ import { useRouter } from 'next/router';
 export default function IndexPage ({ data }) {
     return(
     <div>
-        {data.map((box, key) => (
-            <div id={key}>
+        {data.map((box) => (
+            <div key={box.id}>
                 <h1> {box.name} </h1>
                 <h2> {box.category} {box.class} {box.subject} </h2>
                 <h3> {box.difficulty} </h3>
