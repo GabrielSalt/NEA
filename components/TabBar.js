@@ -4,8 +4,7 @@ import Icon from 'react-native-vector-icons/Feather';
 
 export default function MyTabBar({ state, descriptors, navigation }) {
   const dict = {
-    'Home': 'home',
-    'Puzzle': 'edit',
+    'Main': 'home',
     'Info': 'info'
   }
   return (
@@ -43,7 +42,7 @@ export default function MyTabBar({ state, descriptors, navigation }) {
 
         return (
           <TouchableOpacity
-            key={options.tabBarTestID}
+            key={Math.random()*100000000}
             accessibilityRole="button"
             accessibilityState={isFocused ? { selected: true } : {}}
             accessibilityLabel={options.tabBarAccessibilityLabel}
@@ -58,7 +57,7 @@ export default function MyTabBar({ state, descriptors, navigation }) {
                     borderRadius: 0 }}
           >
             <Icon.Button
-            key={options.tabBarTestID + 5000}
+            key={Math.random()*100000000}
                 name={dict[label]}
                 color={isFocused ? '#673ab7' : '#222' }
                 backgroundColor={'#DDDDDD'}

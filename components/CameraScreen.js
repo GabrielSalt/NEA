@@ -2,12 +2,13 @@ import Icon from 'react-native-vector-icons/Feather';
 import React, { useState, useEffect, useRef, Component} from 'react'
 import { StyleSheet, Text, View, Button, FlatList, TouchableOpacity } from 'react-native';
 import { AutoFocus, Camera, CameraType } from 'expo-camera';
-import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { useIsFocused } from '@react-navigation/native';
 
 export default function CameraScreen( {route, navigation}) {
+    const isFocused = useIsFocused();
     const [Permission, setPermission] = useState(Camera.useCameraPermissions())
-    const [Ready, setReady] = useState(false)
     const [cameraRef, setCameraRef] = useState(null)
+    const [enabled, setEnabled] = useState(false)
 
     useEffect(() => {
         (async() => {
@@ -17,34 +18,33 @@ export default function CameraScreen( {route, navigation}) {
     })
 
     async function takePhoto(){
-        if (cameraRef){
-            const data = await cameraRef.takePictureAsync({base64: true})
-            setReady(false)
-            navigation.navigate('Confirm', {image: data})
-        }
+        setEnabled(false)
+        const data = await cameraRef.takePictureAsync({base64: true})
+        navigation.navigate('Confirm', {image: data.uri})
     }
 
     function onCameraReady () {
-        setReady(true);
+        setEnabled(true)
     }
 
     if (Permission === null) {
         return(
-            <Text> YOOO </Text>
+            <Text> Camera Unavailable, Please Use Manual Setter </Text>
         )
     }
-    else {
+    else if (isFocused) {
         return(
-            <View styles = {styles.Container}>
                 <Camera ref={ref => {setCameraRef(ref)}} type={CameraType.back} ratio='1:1' style={styles.Camera} onCameraReady={onCameraReady}>
                     <View style={styles.ButtonContainer}>
-                        <TouchableOpacity onPress={takePhoto} style={styles.Button}>
+                        <TouchableOpacity onPress={takePhoto} style={styles.Button} disabled={!enabled}>
                             <Icon size={36} color='#FFFFFF' name='circle'></Icon>
                         </TouchableOpacity>
                     </View>
                 </Camera>
-            </View>
         )
+    }
+    else {
+        return <Text>Not focused</Text>
     }
 }
 
@@ -53,12 +53,6 @@ const styles = StyleSheet.create({
         marginTop: '30%',
         width: '100%',
         aspectRatio: 1,
-    },
-    Container: {
-        backgroundColor: '#000000',
-        flex: 1,
-        width: '100%',
-        height: '100%',
     },
     ButtonContainer: {
         marginTop: '90%',

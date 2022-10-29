@@ -2,51 +2,27 @@ import Icon from 'react-native-vector-icons/Feather';
 import React, {Component} from 'react'
 import { StyleSheet, Text, View, FlatList } from 'react-native';
 import { TouchableOpacity } from 'react-native-gesture-handler';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
 
-export default function HomeScreen({ navigation }) {
+import Start from './Start';
+import CameraScreen from './CameraScreen';
+import ConfirmScreen from './ConfirmScreen';
+import Setter from './Setter';
+import LoadScreen from './LoadScreen';
+import Solver from './Solver';
+
+const Stack = createNativeStackNavigator();
+
+export default function HomeScreen({ route, navigation }) {
     return(
-      <View style={styles.Container}>
-        <Icon name='edit' size={250}>
-        </Icon>
-        <TouchableOpacity>
-        <Icon.Button style={styles.Button}
-          name='camera'
-          backgroundColor='#77AEE8'
-          size={48}
-          onPress={() => navigation.navigate('Puzzle', {mode: 'Camera'})}
-        >
-          Camera Mode
-        </Icon.Button>
-        </TouchableOpacity>
-        <Icon.Button style={styles.Button}
-          name='pen-tool'
-          backgroundColor='#77AEE8'
-          size={48}
-          onPress={() => navigation.navigate('Puzzle', {mode: 'Setter'})}
-        >
-          Manual Mode
-        </Icon.Button>
-        <Icon.Button style={styles.Button}
-          name='refresh-cw'
-          backgroundColor='#77AEE8'
-          size={48}
-          onPress={() => navigation.navigate('Puzzle', {mode: 'Load'})}
-        >
-          Load Puzzle          
-        </Icon.Button>
-      </View>
+      <Stack.Navigator>
+          <Stack.Screen name='Home' component={Start}/>
+          <Stack.Screen name='Camera' component={CameraScreen}/>
+          <Stack.Screen name='Confirm' component={ConfirmScreen}/>
+          <Stack.Screen name='Setter' component={Setter}/>
+          <Stack.Screen name='Load' component={LoadScreen}/>
+          <Stack.Screen name='Solver' component={Solver}/>
+        </Stack.Navigator>
     )
 }
 
-const styles = StyleSheet.create({
-  Container: {
-    flex: 1,
-    flexDirection: "column",
-    alignItems: 'center',
-    width: '100%',
-    justifyContent: 'space-evenly',
-  },
-  Button: {
-    width: '80%',
-  }
-})
