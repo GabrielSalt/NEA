@@ -9,6 +9,8 @@ npm-debug.*
 *.mobileprovision
 *.orig.*
 web-build/
+opencv2.framework/
+opencv-4.1.0-ios-framework.zip
 
 # macOS
 .DS_Store
