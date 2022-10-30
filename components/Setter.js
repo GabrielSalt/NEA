@@ -6,6 +6,11 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 
 
 export default function Setter({route, navigation}) {
+    
+    if (route.params){
+      route.params.topLeft
+    }
+
     return (
       <Button title='Hi' onPress={() => navigation.navigate('Camera')}>
       </Button>

@@ -1,31 +1,102 @@
 import Icon from 'react-native-vector-icons/Feather';
-import React, { useState, Component} from 'react'
-import { StyleSheet, Text, View, FlatList, Image, Button } from 'react-native';
+import React, { useState, Component, useEffect} from 'react'
+import { StyleSheet, Text, View, FlatList, Image, Button, TouchableOpacity, ImageBackground, Dimensions } from 'react-native';
+import Svg, {Line, Circle, Rect, SvgUri } from 'react-native-svg';
 
 export default function ConfirmScreen( {route, navigation}) {
-    const [picture, setPicture] = useState(route.params.image)
+    const [image, setImage] = useState(route.params.image)
+    const [prompt, setPrompt] = useState('Please click on the top left corner of the sudoku grid')
+    const [topLeft, setTopLeft] = useState([0,0])
+    const [bottomRight, setBottomRight] = useState([0,0])
+    const [Selected, setSelected] = useState(false)
+    const [Lines, setLines] = useState([])
+
+    function HandlePress(evt){
+      if (prompt == 'Please click on the top left corner of the sudoku grid'){
+        setTopLeft([evt.nativeEvent.locationX,evt.nativeEvent.locationY])
+      }
+      else {
+        setBottomRight([evt.nativeEvent.locationX,evt.nativeEvent.locationY])
+        setSelected(true)
+
+      }
+    }
+
+    useEffect(() => {
+      const topright = [bottomRight[0], topLeft[1]]
+      const bottomleft = [topLeft[0], bottomRight[1]]
+      var lines = []
+      for (let x = 0; x < 10; x++){
+
+          // Horizontal Lines
+          var x1 = topLeft[0]
+          var x2 = topright[0]
+          var y1 = topLeft[1] + Math.round(x*(bottomleft[1]-topLeft[1])/9)
+          var y2 = topLeft[1] + Math.round(x*(bottomleft[1]-topLeft[1])/9)
+          var strokeWidth = 1
+          if (x == 3 || x == 6){strokeWidth = 2}
+          else if (x == 0 || x == 9){strokeWidth = 3}
+
+          var lineInfo = { x1, x2, y1, y2, strokeWidth }
+          console.log(lineInfo)
+          lines.push(lineInfo)
+
+          // Vertical Lines
+          var x1 = topLeft[0] + Math.round(x*(bottomRight[0]-topLeft[0])/9)
+          var x2 = topLeft[0] + Math.round(x*(bottomRight[0]-topLeft[0])/9)
+          var y1 = topLeft[1]
+          var y2 = bottomleft[1]
+          var strokeWidth = 0.25
+          if (x % 3 == 0){strokeWidth = 2}
+
+          var lineInfo = { x1, x2, y1, y2, strokeWidth }
+          lines.push(lineInfo)
+          console.log(lineInfo)
+        }
+        setLines(lines)
+    }, [topLeft, bottomRight])
+
+    function readGrid(){
+      
+    }
+
     return (
       <View style={styles.Container}>
-        <Text> Confirm Image? </Text>
-        <Image source={{uri: route.params.image}} style={styles.Image}></Image>
-        <Icon.Button
-                name='check'
-                color={'#44FF44'}
-                backgroundColor={'#DDDDDD'}
-                size={36}
-                style={{borderRadius: 0, width: '100%'}}
-                onPress={navigation.navigate('Setter')}
-                onLongPress={navigation.navigate('Setter')}
-          ></Icon.Button>
-          <Icon.Button
-                name='x'
-                color={'#FF4444'}
-                backgroundColor={'#DDDDDD'}
-                size={36}
-                style={{borderRadius: 0, width: '100%'}}
-                onPress={navigation.navigate('Camera')}
-                onLongPress={navigation.navigate('Camera')}
-            ></Icon.Button>
+        <TouchableOpacity onPress={(evt) => HandlePress(evt)}>
+          <ImageBackground width='100%' height={Dimensions.get('window').width} source={{uri: image}}>
+          <Svg width='100%' height={Dimensions.get('window').width} >
+                {(topLeft != [0,0]) && <Circle 
+                cx={topLeft[0]}
+                cy={topLeft[1]}
+                r='5'
+                fill='red'
+                />}
+                {(bottomRight != [0,0]) && <Circle 
+                cx={bottomRight[0]}
+                cy={bottomRight[1]}
+                r='5'
+                fill='red'
+                />}
+                {Lines.map((line,index) => {
+                  return(
+                  <Line
+                    key={index}
+                    x1={line['x1']}
+                    x2={line['x2']}
+                    y1={line['y1']}
+                    y2={line['y2']}
+                    stroke='red'
+                    strokeWidth={line['strokeWidth']}
+                  />)
+                })}
+            </Svg>
+            </ImageBackground>
+        </TouchableOpacity>
+        {!Selected && <Text> {prompt} </Text>}
+        {Selected && <Text> Check that all digits are within their cell </Text>}
+        <Button title='Edit Top Left' onPress={() => setPrompt('Please click on the top left corner of the sudoku grid')}></Button>
+        <Button title='Edit Bottom Right' onPress={() => setPrompt('Please click on the bottom right corner of the sudoku grid')}></Button>
+        {Selected && <Button title="Continue to Setter" onPress={() => readGrid()}/>}
       </View>
     )
 }
@@ -37,7 +108,7 @@ const styles = StyleSheet.create({
       aspectRatio: 1,
   },
   Container: {
-      backgroundColor: '#000000',
+      backgroundColor: '#FFFFFF',
       flex: 1,
       width: '100%',
       height: '50%',
