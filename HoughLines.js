@@ -1,1 +1,0 @@
-import {cv, handleError, registerFile} from '@mootari/opencv-js'

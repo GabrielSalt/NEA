@@ -3,11 +3,11 @@ import React, { useState, Component} from 'react'
 import { StyleSheet, Text, View, FlatList, Image, Button } from 'react-native';
 
 export default function ConfirmScreen( {route, navigation}) {
-    const picture = route.params.image
+    const [picture, setPicture] = useState(route.params.image)
     return (
       <View style={styles.Container}>
         <Text> Confirm Image? </Text>
-        <Image source={{uri: picture}} style={styles.Image}></Image>
+        <Image source={{uri: route.params.image}} style={styles.Image}></Image>
         <Icon.Button
                 name='check'
                 color={'#44FF44'}
