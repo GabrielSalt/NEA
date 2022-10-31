@@ -1,7 +1,17 @@
 import Icon from 'react-native-vector-icons/Feather';
 import React, { useState, Component, useEffect} from 'react'
-import { StyleSheet, Text, View, FlatList, Image, Button, TouchableOpacity, ImageBackground, Dimensions } from 'react-native';
+import { StyleSheet, Text, View, FlatList, Image, Button, TouchableOpacity, ImageBackground, Dimensions, ImageEditor } from 'react-native';
 import Svg, {Line, Circle, Rect, SvgUri } from 'react-native-svg';
+import * as ImageManipulator from 'expo-image-manipulator';
+import * as b64tobuff from 'base64-arraybuffer';
+import * as tf from '@tensorflow/tfjs';
+import { decodeJpeg, bundleResourceIO } from '@tensorflow/tfjs-react-native';
+
+const modelJson = require('../assets/model/model.json');
+const modelWeights = require('../assets/model/model_weights.bin');
+const model = await tf.loadLayersModel(
+      bundleResourceIO(modelJson, modelWeights)
+)
 
 export default function ConfirmScreen( {route, navigation}) {
     const [image, setImage] = useState(route.params.image)
@@ -10,6 +20,7 @@ export default function ConfirmScreen( {route, navigation}) {
     const [bottomRight, setBottomRight] = useState([0,0])
     const [Selected, setSelected] = useState(false)
     const [Lines, setLines] = useState([])
+    const [bruhimage, setbruhimage] = useState(null)
 
     function HandlePress(evt){
       if (prompt == 'Please click on the top left corner of the sudoku grid'){
@@ -38,7 +49,6 @@ export default function ConfirmScreen( {route, navigation}) {
           else if (x == 0 || x == 9){strokeWidth = 3}
 
           var lineInfo = { x1, x2, y1, y2, strokeWidth }
-          console.log(lineInfo)
           lines.push(lineInfo)
 
           // Vertical Lines
@@ -51,13 +61,32 @@ export default function ConfirmScreen( {route, navigation}) {
 
           var lineInfo = { x1, x2, y1, y2, strokeWidth }
           lines.push(lineInfo)
-          console.log(lineInfo)
         }
         setLines(lines)
     }, [topLeft, bottomRight])
 
-    function readGrid(){
-      
+    async function readGrid(){
+      var batch = []
+      const width = (bottomRight[0] - topLeft[0])/9
+      const height = (bottomRight[1] - topLeft[1])/9
+      for (let x = 0; x < 10; x++){
+        for (let y = 0; y < 10; x++){
+           var cellImage = await ImageManipulator.manipulateAsync(
+              image, 
+              [
+                  { crop: { height, width, originX: (topLeft[0] + Math.round(x*(bottomRight[0]-topLeft[0])/9)), originY: (topLeft[1] + Math.round(y*(bottomRight[1]-topLeft[1])/9))}}, 
+                  {resize: {height:28, width:28}}
+              ],
+              { format: 'png', base64: true}
+          )
+          setbruhimage(cellImage.base64)
+          var ImgArray = b64tobuff.decode(cellImage.base64)
+          var finalImg = decodeJpeg(ImgArray)
+          const prediction = (await model.predict(finalImg))[0]
+          console.log(prediction)
+          batch.push(ImgArray)
+        }
+      }
     }
 
     return (
@@ -97,6 +126,7 @@ export default function ConfirmScreen( {route, navigation}) {
         <Button title='Edit Top Left' onPress={() => setPrompt('Please click on the top left corner of the sudoku grid')}></Button>
         <Button title='Edit Bottom Right' onPress={() => setPrompt('Please click on the bottom right corner of the sudoku grid')}></Button>
         {Selected && <Button title="Continue to Setter" onPress={() => readGrid()}/>}
+        {bruhimage && <Image width='100%' height={Dimensions.get('window').width} source={{uri: bruhimage}}/>}
       </View>
     )
 }
