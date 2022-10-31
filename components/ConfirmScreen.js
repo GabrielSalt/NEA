@@ -1,17 +1,14 @@
 import Icon from 'react-native-vector-icons/Feather';
-import React, { useState, Component, useEffect} from 'react'
+import React, { useState, useEffect} from 'react'
 import { StyleSheet, Text, View, FlatList, Image, Button, TouchableOpacity, ImageBackground, Dimensions, ImageEditor } from 'react-native';
 import Svg, {Line, Circle, Rect, SvgUri } from 'react-native-svg';
 import * as ImageManipulator from 'expo-image-manipulator';
-import * as b64tobuff from 'base64-arraybuffer';
+import { decode } from 'base64-arraybuffer';
 import * as tf from '@tensorflow/tfjs';
 import { decodeJpeg, bundleResourceIO } from '@tensorflow/tfjs-react-native';
 
 const modelJson = require('../assets/model/model.json');
 const modelWeights = require('../assets/model/model_weights.bin');
-const model = await tf.loadLayersModel(
-      bundleResourceIO(modelJson, modelWeights)
-)
 
 export default function ConfirmScreen( {route, navigation}) {
     const [image, setImage] = useState(route.params.image)
@@ -20,7 +17,6 @@ export default function ConfirmScreen( {route, navigation}) {
     const [bottomRight, setBottomRight] = useState([0,0])
     const [Selected, setSelected] = useState(false)
     const [Lines, setLines] = useState([])
-    const [bruhimage, setbruhimage] = useState(null)
 
     function HandlePress(evt){
       if (prompt == 'Please click on the top left corner of the sudoku grid'){
@@ -29,9 +25,20 @@ export default function ConfirmScreen( {route, navigation}) {
       else {
         setBottomRight([evt.nativeEvent.locationX,evt.nativeEvent.locationY])
         setSelected(true)
-
       }
     }
+
+    const loadModel = async()=>{
+      await tf.ready()
+      console.log('About to load!')
+          const Model = await tf.loadLayersModel(
+              bundleResourceIO(modelJson, modelWeights)
+          ).catch((e)=>{
+            console.log("[LOADING ERROR] info:",e)
+          })
+          console.log('Loaded!')
+          return Model
+      }
 
     useEffect(() => {
       const topright = [bottomRight[0], topLeft[1]]
@@ -65,26 +72,45 @@ export default function ConfirmScreen( {route, navigation}) {
         setLines(lines)
     }, [topLeft, bottomRight])
 
+    const transformImageToTensor = async (img64)=>{
+      //.ts: const transformImageToTensor = async (uri:string):Promise<tf.Tensor>=>{
+      //read the image as base64
+        const imgBuffer =  tf.util.encodeString(img64, 'base64').buffer
+        const raw = new Uint8Array(imgBuffer)
+        await tf.ready()
+        let imgTensor = decodeJpeg(raw)
+        const scalar = tf.scalar(255)
+      //resize the image
+        imgTensor = tf.image.resizeNearestNeighbor(imgTensor, [28,28])
+      //normalize; if a normalization layer is in the model, this step can be skipped
+        const tensorScaled = imgTensor.div(scalar)
+      //final shape of the rensor
+        const img = tf.reshape(tensorScaled, [-1,28,28,1])
+        return img
+    }
+
     async function readGrid(){
-      var batch = []
+      const model = await loadModel()
+      var nums = []
       const width = (bottomRight[0] - topLeft[0])/9
       const height = (bottomRight[1] - topLeft[1])/9
-      for (let x = 0; x < 10; x++){
-        for (let y = 0; y < 10; x++){
+      for (let x = 0; x < 9; x++){
+        for (let y = 0; y < 9; y++){
+          if (y == 0){
            var cellImage = await ImageManipulator.manipulateAsync(
               image, 
               [
                   { crop: { height, width, originX: (topLeft[0] + Math.round(x*(bottomRight[0]-topLeft[0])/9)), originY: (topLeft[1] + Math.round(y*(bottomRight[1]-topLeft[1])/9))}}, 
                   {resize: {height:28, width:28}}
               ],
-              { format: 'png', base64: true}
+              { format: 'jpeg', base64: true}
           )
-          setbruhimage(cellImage.base64)
-          var ImgArray = b64tobuff.decode(cellImage.base64)
-          var finalImg = decodeJpeg(ImgArray)
-          const prediction = (await model.predict(finalImg))[0]
-          console.log(prediction)
-          batch.push(ImgArray)
+          const tensor_image = await transformImageToTensor(cellImage.base64)
+          const predictions = await model.predict(tensor_image)
+          const num = predictions.dataSync()
+          console.log(num)
+          console.log('/n')
+          }
         }
       }
     }
@@ -126,7 +152,6 @@ export default function ConfirmScreen( {route, navigation}) {
         <Button title='Edit Top Left' onPress={() => setPrompt('Please click on the top left corner of the sudoku grid')}></Button>
         <Button title='Edit Bottom Right' onPress={() => setPrompt('Please click on the bottom right corner of the sudoku grid')}></Button>
         {Selected && <Button title="Continue to Setter" onPress={() => readGrid()}/>}
-        {bruhimage && <Image width='100%' height={Dimensions.get('window').width} source={{uri: bruhimage}}/>}
       </View>
     )
 }

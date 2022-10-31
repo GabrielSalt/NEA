@@ -1,4 +1,4 @@
-const blacklist = require('metro-config/src/defaults/blacklist');
+const blacklist = require('metro-config/src/defaults/exclusionList');
 
 module.exports = {
   transformer: {
@@ -12,6 +12,6 @@ module.exports = {
   resolver: {
     assetExts: ['bin', 'txt', 'jpg', 'ttf', 'png'],
     sourceExts: ['js', 'json', 'ts', 'tsx', 'jsx'],
-    blacklistRE: blacklist([/platform_node/])
+    exclusionListRE: blacklist([/platform_node/])
   },
 };
