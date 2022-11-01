@@ -1,11 +1,12 @@
 import Icon from 'react-native-vector-icons/Feather';
 import React, { useState, useEffect} from 'react'
-import { StyleSheet, Text, View, FlatList, Image, Button, TouchableOpacity, ImageBackground, Dimensions, ImageEditor } from 'react-native';
+import { StyleSheet, Text, View, FlatList, Image, Button, TouchableOpacity, ImageBackground, Dimensions } from 'react-native';
 import Svg, {Line, Circle, Rect, SvgUri } from 'react-native-svg';
 import * as ImageManipulator from 'expo-image-manipulator';
 import { decode } from 'base64-arraybuffer';
 import * as tf from '@tensorflow/tfjs';
 import { decodeJpeg, bundleResourceIO } from '@tensorflow/tfjs-react-native';
+import * as jpeg from 'jpeg-js';
 
 const modelJson = require('../assets/model/model.json');
 const modelWeights = require('../assets/model/model_weights.bin');
@@ -17,6 +18,7 @@ export default function ConfirmScreen( {route, navigation}) {
     const [bottomRight, setBottomRight] = useState([0,0])
     const [Selected, setSelected] = useState(false)
     const [Lines, setLines] = useState([])
+    const [SrcDimensions, setSrcDimensions] = useState(null)
 
     function HandlePress(evt){
       if (prompt == 'Please click on the top left corner of the sudoku grid'){
@@ -57,7 +59,6 @@ export default function ConfirmScreen( {route, navigation}) {
 
           var lineInfo = { x1, x2, y1, y2, strokeWidth }
           lines.push(lineInfo)
-
           // Vertical Lines
           var x1 = topLeft[0] + Math.round(x*(bottomRight[0]-topLeft[0])/9)
           var x2 = topLeft[0] + Math.round(x*(bottomRight[0]-topLeft[0])/9)
@@ -70,52 +71,67 @@ export default function ConfirmScreen( {route, navigation}) {
           lines.push(lineInfo)
         }
         setLines(lines)
+        if (!SrcDimensions){
+          Image.getSize(image, (srcWidth, srcHeight) => {
+            setSrcDimensions(srcWidth)
+          })
+        }
     }, [topLeft, bottomRight])
 
     const transformImageToTensor = async (img64)=>{
-      //.ts: const transformImageToTensor = async (uri:string):Promise<tf.Tensor>=>{
       //read the image as base64
         const imgBuffer =  tf.util.encodeString(img64, 'base64').buffer
         const raw = new Uint8Array(imgBuffer)
         await tf.ready()
         let imgTensor = decodeJpeg(raw)
-        const scalar = tf.scalar(255)
-      //resize the image
+        let rgb_weights = [0.2989, 0.5870, 0.1140]
+        imgTensor = tf.mul(imgTensor, rgb_weights).toInt()
+        imgTensor = tf.sum(imgTensor, -1)
+        imgTensor = tf.expandDims(imgTensor, -1)
+        //resize the image
         imgTensor = tf.image.resizeNearestNeighbor(imgTensor, [28,28])
-      //normalize; if a normalization layer is in the model, this step can be skipped
-        const tensorScaled = imgTensor.div(scalar)
       //final shape of the rensor
-        const img = tf.reshape(tensorScaled, [-1,28,28,1])
+        const img = tf.reshape(imgTensor, [1,28,28,1])
         return img
     }
 
     async function readGrid(){
       const model = await loadModel()
-      var nums = []
-      const width = (bottomRight[0] - topLeft[0])/9
-      const height = (bottomRight[1] - topLeft[1])/9
+      let nums = []
+      const width = Math.round((bottomRight[0] - topLeft[0])/9)
+      const height = Math.round((bottomRight[1] - topLeft[1])/9)
+      const ScreenDimensions = Dimensions.get('window').width
       for (let x = 0; x < 9; x++){
         for (let y = 0; y < 9; y++){
-          if (y == 0){
-           var cellImage = await ImageManipulator.manipulateAsync(
+          if (y == 0 && x==4){
+            var originX = Math.round(topLeft[0] + x*(bottomRight[0]-topLeft[0])/9)
+            var originY = Math.round(topLeft[1] + y*(bottomRight[1]-topLeft[1])/9)
+            var cellImage = await ImageManipulator.manipulateAsync(
               image, 
               [
-                  { crop: { height, width, originX: (topLeft[0] + Math.round(x*(bottomRight[0]-topLeft[0])/9)), originY: (topLeft[1] + Math.round(y*(bottomRight[1]-topLeft[1])/9))}}, 
-                  {resize: {height:28, width:28}}
+                  { crop: { height: height*SrcDimensions/ScreenDimensions*2, originX: originX*SrcDimensions/ScreenDimensions*2, originY: originY*SrcDimensions/ScreenDimensions*2, width: width*SrcDimensions/ScreenDimensions*1.8}}, 
               ],
               { format: 'jpeg', base64: true}
           )
-          const tensor_image = await transformImageToTensor(cellImage.base64)
-          const predictions = await model.predict(tensor_image)
-          const num = predictions.dataSync()
-          console.log(num)
-          console.log('/n')
+          setImage(cellImage.uri) 
+          var tensor = await transformImageToTensor(cellImage.base64)
+          zeros = tf.zeros([1,28,28,1])
+          onetwoseven = tf.scalar(127)
+          twofivefive = tf.scalar(255)
+          ones = tf.ones([1,28,28,1])
+          onetwosevens = tf.mul(ones, onetwoseven).reshape([1,28,28,1])
+          twofivefives = tf.mul(ones, twofivefive).reshape([1,28,28,1])
+          tensor = zeros.where(tensor.greater(onetwosevens), twofivefives)
+          var prediction = await model.predict(tensor)
+          prediction = prediction.dataSync()
+          console.log(prediction)
+          nums.push(prediction)
           }
         }
       }
     }
 
-    return (
+    return ( 
       <View style={styles.Container}>
         <TouchableOpacity onPress={(evt) => HandlePress(evt)}>
           <ImageBackground width='100%' height={Dimensions.get('window').width} source={{uri: image}}>

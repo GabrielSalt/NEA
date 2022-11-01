@@ -7035,7 +7035,7 @@
   "resolved" "https://registry.npmjs.org/join-component/-/join-component-1.1.0.tgz"
   "version" "1.1.0"
 
-"jpeg-js@^0.4.2", "jpeg-js@^0.4.3":
+"jpeg-js@^0.4.2", "jpeg-js@^0.4.3", "jpeg-js@^0.4.4":
   "integrity" "sha512-WZzeDOEtTOBK4Mdsar0IqEU5sMr3vSV2RqkAIzUEV2BHnUfKGyswWFPFwK5EeDo93K3FohSHbLAjj0s1Wzd+dg=="
   "resolved" "https://registry.npmjs.org/jpeg-js/-/jpeg-js-0.4.4.tgz"
   "version" "0.4.4"
@@ -9648,7 +9648,7 @@
     "jscodeshift" "^0.13.1"
     "nullthrows" "^1.1.1"
 
-"react-native-fs@^2.14.1":
+"react-native-fs@^2.13.3", "react-native-fs@^2.14.1", "react-native-fs@^2.20.0":
   "integrity" "sha512-VkTBzs7fIDUiy/XajOSNk0XazFE9l+QlMAce7lGuebZcag5CnjszB+u4BdqzwaQOdcYb5wsJIsqq4kxInIRpJQ=="
   "resolved" "https://registry.npmjs.org/react-native-fs/-/react-native-fs-2.20.0.tgz"
   "version" "2.20.0"
@@ -9671,6 +9671,16 @@
   "integrity" "sha512-+4JpbIx42zGTONhBTIXSyfyHICHC29VTvhkkoUOJAh/XHPEixpuBduYgf6Y4y9wsN1ARlQhBBoptTvXvAFQf5g=="
   "resolved" "https://registry.npmjs.org/react-native-gradle-plugin/-/react-native-gradle-plugin-0.0.7.tgz"
   "version" "0.0.7"
+
+"react-native-image-converter@^0.4.2":
+  "integrity" "sha512-y6rEZLSNseIfoMQyFYQmzLc9rKV5i+HWccOW88IPN5828C2nYorwobVBUrA3hC9C277ZFm7U5XMMxgrSl+h2sw=="
+  "resolved" "https://registry.npmjs.org/react-native-image-converter/-/react-native-image-converter-0.4.2.tgz"
+  "version" "0.4.2"
+
+"react-native-opencv3@^1.0.8":
+  "integrity" "sha512-v+tiiAtP0HAks7EwznmHvgMtdabAjJOURzmdV5OKSQpmf2zHHDyuCr5N3G3tX24x80wRX0YGpE4N4vh5lonegQ=="
+  "resolved" "https://registry.npmjs.org/react-native-opencv3/-/react-native-opencv3-1.0.8.tgz"
+  "version" "1.0.8"
 
 "react-native-safe-area-context@>= 3.0.0", "react-native-safe-area-context@4.3.1":
   "integrity" "sha512-cEr7fknJCToTrSyDCVNg0GRdRMhyLeQa2NZwVCuzEQcWedOw/59ExomjmzCE4rxrKXs6OJbyfNtFRNyewDaHuA=="
@@ -9721,7 +9731,7 @@
     "postcss-value-parser" "^4.2.0"
     "styleq" "^0.1.2"
 
-"react-native@*", "react-native@^0.0.0-0 || 0.60 - 0.70 || 1000.0.0", "react-native@>= 0.58.0", "react-native@>=0.50.0", "react-native@0.69.6":
+"react-native@*", "react-native@^0.0.0-0 || 0.60 - 0.70 || 1000.0.0", "react-native@^0.41.2", "react-native@>= 0.58.0", "react-native@>=0.50.0", "react-native@0.59.5", "react-native@0.69.6":
   "integrity" "sha512-wwXpqM+12kdEYdBZCJUb5SBu95CzgejrwFeYJ78RzHZV/Sj6DBRekbsHGrDDsY4R25QXALQxy4DQYQCObVvWjA=="
   "resolved" "https://registry.npmjs.org/react-native/-/react-native-0.69.6.tgz"
   "version" "0.69.6"
@@ -11134,6 +11144,11 @@
   "integrity" "sha512-N+8UisAXDGk8PFXP4HAzVR9nbfmVJ3zYLAWiTIoqC5v5isinhr+r5uaO8+7r3BMfuNIufIsA7RdpVgacC2cSpw=="
   "resolved" "https://registry.npmjs.org/text-table/-/text-table-0.2.0.tgz"
   "version" "0.2.0"
+
+"tflite-react-native@^0.0.5":
+  "integrity" "sha512-aBajq5yQQ8UiB92tIk+v9BIKZTFGwCTHegfefISgnXwqPiPAAvKhdX6Vb80kJFPTUjXB53w/NZQT9qCyVBYMyA=="
+  "resolved" "https://registry.npmjs.org/tflite-react-native/-/tflite-react-native-0.0.5.tgz"
+  "version" "0.0.5"
 
 "thenify-all@^1.0.0":
   "integrity" "sha512-RNxQH/qI8/t3thXJDwcstUO4zeqo64+Uy/+sNVRBx4Xn2OX+OZ9oP+iJnNFqplFra2ZUVeKCSa2oVWi3T4uVmA=="
