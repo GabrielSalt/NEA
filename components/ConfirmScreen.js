@@ -5,7 +5,7 @@ import Svg, {Line, Circle, Rect, SvgUri } from 'react-native-svg';
 import * as ImageManipulator from 'expo-image-manipulator';
 import { decode } from 'base64-arraybuffer';
 import * as tf from '@tensorflow/tfjs';
-import { decodeJpeg, bundleResourceIO } from '@tensorflow/tfjs-react-native';
+import { decodeJpeg, bundleResourceIO, cameraWithTensors } from '@tensorflow/tfjs-react-native';
 import * as jpeg from 'jpeg-js';
 
 const modelJson = require('../assets/model/model.json');
@@ -91,8 +91,8 @@ export default function ConfirmScreen( {route, navigation}) {
         //resize the image
         imgTensor = tf.image.resizeNearestNeighbor(imgTensor, [28,28])
       //final shape of the rensor
-        const img = tf.reshape(imgTensor, [1,28,28,1])
-        return img
+        const tensor = tf.reshape(imgTensor, [28,28,1])
+        return tensor
     }
 
     async function readGrid(){
@@ -103,32 +103,49 @@ export default function ConfirmScreen( {route, navigation}) {
       const ScreenDimensions = Dimensions.get('window').width
       for (let x = 0; x < 9; x++){
         for (let y = 0; y < 9; y++){
-          if (y == 0 && x==4){
-            var originX = Math.round(topLeft[0] + x*(bottomRight[0]-topLeft[0])/9)
-            var originY = Math.round(topLeft[1] + y*(bottomRight[1]-topLeft[1])/9)
-            var cellImage = await ImageManipulator.manipulateAsync(
-              image, 
-              [
-                  { crop: { height: height*SrcDimensions/ScreenDimensions*2, originX: originX*SrcDimensions/ScreenDimensions*2, originY: originY*SrcDimensions/ScreenDimensions*2, width: width*SrcDimensions/ScreenDimensions*1.8}}, 
-              ],
-              { format: 'jpeg', base64: true}
-          )
-          setImage(cellImage.uri) 
-          var tensor = await transformImageToTensor(cellImage.base64)
-          zeros = tf.zeros([1,28,28,1])
-          onetwoseven = tf.scalar(127)
-          twofivefive = tf.scalar(255)
-          ones = tf.ones([1,28,28,1])
-          onetwosevens = tf.mul(ones, onetwoseven).reshape([1,28,28,1])
-          twofivefives = tf.mul(ones, twofivefive).reshape([1,28,28,1])
-          tensor = zeros.where(tensor.greater(onetwosevens), twofivefives)
+          if (y == 0){
+          var originX = Math.round(topLeft[0])
+          var originY = Math.round(topLeft[1])
+          var cellImage = await ImageManipulator.manipulateAsync(
+            image, 
+            [
+                { crop: { height: height*SrcDimensions/ScreenDimensions*2, originX: originX*SrcDimensions/ScreenDimensions*2 + x*SrcDimensions/ScreenDimensions*width*1.8, originY: originY*SrcDimensions/ScreenDimensions*2 + y*SrcDimensions/ScreenDimensions*height*2, width: width*SrcDimensions/ScreenDimensions*1.8}}, 
+            ],
+            { format: 'jpeg', base64: true}
+        )
+        var tensor = await transformImageToTensor(cellImage.base64)
+        var zeros = tf.zeros([1,28,28,1])
+        var onetwoseven = tf.scalar(127)
+        var twofivefive = tf.scalar(255)
+        var ones = tf.ones([1,28,28,1])
+        var onetwosevens = tf.mul(ones, onetwoseven).reshape([1,28,28,1])
+        var twofivefives = tf.mul(ones, twofivefive).reshape([1,28,28,1])
+        tensor = zeros.where(tensor.greater(onetwosevens), twofivefives)
+        var numOfBlack = tensor.dataSync().filter(x=>x==255).length
+        var tensors = []
+        var xy = []
+        /*if (numOfBlack < 50){
+          nums.push(0)
+        } 
+        else{
           var prediction = await model.predict(tensor)
           prediction = prediction.dataSync()
-          console.log(prediction)
-          nums.push(prediction)
+          if (prediction.indexOf(1) == -1){
+            console.log('Prediction Unclear')
+            console.log(x,y)
           }
+          nums.push(prediction.indexOf(1))
+        }   */
+        tensors.push(tensor)
+        xy.push([x,y])
         }
       }
+      }
+      for (let tensor of tensors){
+      const prediction = await model.predict(tensor)
+      nums.push(prediction.dataSync())
+      }
+      console.log(nums)
     }
 
     return ( 
