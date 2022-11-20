@@ -76,7 +76,15 @@ export default function ConfirmScreen( {route, navigation}) {
     }, [topLeft, bottomRight])
 
     function readGrid(){
-      
+      grid = []
+      for (let x = 0; x < 10; x++){
+        row = []
+        for (let y = 0; y < 10; y++){
+          row.push(Math.round(Math.random()*10))
+        }
+        grid.push(row)
+      }
+      navigation.navigate('Setter', {grid})
     }
 
     return ( 
