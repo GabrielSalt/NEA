@@ -6,13 +6,13 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 
 
 export default function Setter({route, navigation}) {
-    
-    if (route.params){
-      route.params.topLeft
+    const [text, setText] = useState(null)
+    if (route.params && text==null){
+      setText(route.params.grid)
     }
 
     return (
-      <Button title='Hi' onPress={() => navigation.navigate('Camera')}>
+      <Button title={text? text: 'hi'} onPress={() => navigation.navigate('Camera')}>
       </Button>
     );
 }

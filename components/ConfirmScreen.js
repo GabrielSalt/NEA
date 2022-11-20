@@ -2,6 +2,8 @@ import Icon from 'react-native-vector-icons/Feather';
 import React, { useState, Component, useEffect} from 'react'
 import { StyleSheet, Text, View, FlatList, Image, Button, TouchableOpacity, ImageBackground, Dimensions } from 'react-native';
 import Svg, {Line, Circle, Rect, SvgUri } from 'react-native-svg';
+import { manipulateAsync } from 'expo-image-manipulator';
+
 
 export default function ConfirmScreen( {route, navigation}) {
     const [image, setImage] = useState(route.params.image)
@@ -18,7 +20,6 @@ export default function ConfirmScreen( {route, navigation}) {
       else {
         setBottomRight([evt.nativeEvent.locationX,evt.nativeEvent.locationY])
         setSelected(true)
-
       }
     }
 
@@ -38,7 +39,6 @@ export default function ConfirmScreen( {route, navigation}) {
           else if (x == 0 || x == 9){strokeWidth = 3}
 
           var lineInfo = { x1, x2, y1, y2, strokeWidth }
-          console.log(lineInfo)
           lines.push(lineInfo)
 
           // Vertical Lines
@@ -51,13 +51,24 @@ export default function ConfirmScreen( {route, navigation}) {
 
           var lineInfo = { x1, x2, y1, y2, strokeWidth }
           lines.push(lineInfo)
-          console.log(lineInfo)
         }
         setLines(lines)
     }, [topLeft, bottomRight])
 
-    function readGrid(){
-      
+    async function readGrid(){
+      const width = bottomRight[0] - topLeft[0]
+      const height = bottomRight[1] - topLeft[1]
+      const originX = topLeft[0]
+      const originY = topLeft[1]
+      let grid = []
+      for (let x = 0; x < 10; x++){
+        row = []
+        for (let y = 0; y < 10; x++){
+          row.push(Math.round(Math.random()*10))
+        }
+        grid.push(row)
+      }
+      navigation.navigate('Setter', {grid})
     }
 
     return (
