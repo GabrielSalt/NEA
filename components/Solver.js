@@ -1,15 +1,30 @@
 import React, { useState } from 'react';
-import { View, StyleSheet, Text, Dimensions, Pressable } from 'react-native';
+import { View, StyleSheet, Text, Dimensions, Pressable, Modal, TextInput } from 'react-native';
 import {getBoxes, getCols,getPossibles,getRows,naked_singles,hidden_singles} from './SolveAlgo';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default function Solver ({ route, navigation }) {
   const [grid, setGrid] = useState(route.params.grid);
   const [givens, setGivens] = useState(getGivens(route.params.grid))
   const [selectedCell, setselectedCell] = useState(null);
   const [selectedNum, setselectedNum] = useState(null)
+  const [modalVisible, setmodalVisible] = useState(false)
+  const [text, setText] = useState('')
+
+  async function Save(){
+    let keys = []
+    keys = await AsyncStorage.getAllKeys()
+    if (keys.includes(text)){
+      alert(`Please choose a name that has not already been saved, ${text} already exists.`)
+    }
+    else{
+      const gridJson = JSON.stringify({grid})
+      await AsyncStorage.setItem(text, gridJson)
+      navigation.navigate('Start')
+    }
+  }
 
   function fullSolve(grid, reverse=false){
-
     const grouptypes = [getRows(grid),getCols(grid), getBoxes(grid)]
     for (let groups of grouptypes){
         for (let group of groups){
@@ -130,6 +145,26 @@ export default function Solver ({ route, navigation }) {
 
   return (
     <View style={styles.container}>
+    <Modal
+        visible={modalVisible}
+        transparent={true}
+        onRequestClose={() => {
+          Alert.alert('Modal has been closed.');
+          setmodalVisible(!modalVisible);
+        }}>
+        <View style={{flex: 1,justifyContent: 'center',alignItems: 'center',marginTop: 22}}>
+          <View style={{margin: 20,backgroundColor: 'white',borderRadius: 20,padding: 35,alignItems: 'center',elevation:5}}>
+            <TextInput style={{marginBottom: 15,textAlign: 'center'}} onChangeText={(text) => {setText(text)}} placeholder='Name Puzzle'></TextInput>
+            <Pressable
+              style={{borderRadius: 20,padding: 10,elevation: 2,backgroundColor:'#F194FF'}}
+              onPress={() => Save()}>
+              <Text style={styles.textStyle}>Save Name</Text>
+            </Pressable>
+          </View>
+        </View>
+      </Modal>  
+
+
       <View style={styles.gridContainer}>
       {grid.map((value, index) => (
           <Pressable style={[
@@ -157,18 +192,23 @@ export default function Solver ({ route, navigation }) {
           </Pressable>
         ))}
          <Pressable style={[styles.removeButton, 'remove'===selectedNum ? {backgroundColor: '#a9a9a9'} : null,]} key={10000} onPress={() => SelectNum('remove')}>
-            <Text style={styles.removeText}> Remove Cell </Text>
+            <Text style={styles.removeText}> Clear Cell </Text>
           </Pressable>
         </View>
         <View style={styles.buttonContainer}>
           <View style={styles.solverButton}>
             <Pressable onPress={() => setGrid(nextStep(grid))}>
-              <Text style={{fontSize:40, color:'#ffffff', textAlign: 'center'}}>Next Digit</Text>
+              <Text style={{fontSize:30, color:'#ffffff', textAlign: 'center'}}>Next Digit</Text>
             </Pressable>
           </View>
           <View style={styles.solverButton}>
             <Pressable onPress={() => setGrid(fullSolve(grid))}>
-              <Text style={{fontSize:40, color:'#ffffff', textAlign: 'center'}}>Solve Fully</Text>
+              <Text style={{fontSize:30, color:'#ffffff', textAlign: 'center'}}>Solve Fully</Text>
+            </Pressable>
+          </View>
+          <View style={styles.solverButton}>
+            <Pressable onPress={() => setmodalVisible(true)}>
+              <Text style={{fontSize:28, color:'#ffffff', textAlign: 'center'}}>Save Puzzle</Text>
             </Pressable>
           </View>
         </View>

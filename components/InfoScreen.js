@@ -20,33 +20,10 @@ export default function InfoScreen() {
         title: 'Save Puzzle',
         name: 'save',
     },
-    {
-        title: 'Solve Puzzle',
-        name: 'unlock',
-    },
-    {
-        title: 'Undo Last Digit',
-        name: 'chevron-left',
-    },
-    {
-        title: 'Solve Next Digit',
-        name: 'chevron-right',
-    },
-    {
-        title: 'Undo Change',
-        name: 'corner-down-left',
-    },
-    {
-        title: 'Redo Change',
-        name: 'corner-down-right',
-    },
-    {
-        title: 'Remove Digit',
-        name: 'trash-2',
-    },
 ]
     return(
       <View style={{flexDirection:'column'}}>
+        <Text>Here are the meanings of each of the symbols in the app</Text>
         <FlatList
           data={dict}
           keyExtractor={(item, index) => item + index}
