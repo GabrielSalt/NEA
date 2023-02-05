@@ -46,12 +46,12 @@ export default function InfoScreen() {
     },
 ]
     return(
-      <View>
+      <View style={{flexDirection:'column'}}>
         <FlatList
           data={dict}
           keyExtractor={(item, index) => item + index}
           renderItem={({ item }) => 
-            <View> 
+            <View style={{flex: 1}}> 
               <Icon name={item['name']} size={24} color='#000000'/>
               <Text>{item['title']}</Text>
             </View>

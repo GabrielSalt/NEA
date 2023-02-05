@@ -4,8 +4,9 @@ import { StyleSheet, Text, View, FlatList, Image, Button, TouchableOpacity, Imag
 import Svg, {Line, Circle, Rect, SvgUri } from 'react-native-svg';
 import { manipulateAsync } from 'expo-image-manipulator';
 
+const url = "http://13.40.121.151:5002/"
 
-export default function ConfirmScreen( {route, navigation}) {
+export default function ConfirmImageScreen( {route, navigation}) {
     const [image, setImage] = useState(route.params.image)
     const [prompt, setPrompt] = useState('Please click on the top left corner of the sudoku grid')
     const [topLeft, setTopLeft] = useState([0,0])
@@ -21,21 +22,8 @@ export default function ConfirmScreen( {route, navigation}) {
       else {
         setBottomRight([evt.nativeEvent.locationX,evt.nativeEvent.locationY])
         setSelected(true)
-
       }
     }
-
-    const loadModel = async()=>{
-      await tf.ready()
-      console.log('About to load!')
-          const Model = await tf.loadLayersModel(
-              bundleResourceIO(modelJson, modelWeights)
-          ).catch((e)=>{
-            console.log("[LOADING ERROR] info:",e)
-          })
-          console.log('Loaded!')
-          return Model
-      }
 
     useEffect(() => {
       const topright = [bottomRight[0], topLeft[1]]
@@ -53,7 +41,6 @@ export default function ConfirmScreen( {route, navigation}) {
           else if (x == 0 || x == 9){strokeWidth = 3}
 
           var lineInfo = { x1, x2, y1, y2, strokeWidth }
-          console.log(lineInfo)
           lines.push(lineInfo)
           // Vertical Lines
           var x1 = topLeft[0] + Math.round(x*(bottomRight[0]-topLeft[0])/9)
@@ -65,7 +52,6 @@ export default function ConfirmScreen( {route, navigation}) {
 
           var lineInfo = { x1, x2, y1, y2, strokeWidth }
           lines.push(lineInfo)
-          console.log(lineInfo)
         }
         setLines(lines)
         if (!SrcDimensions){
@@ -75,15 +61,22 @@ export default function ConfirmScreen( {route, navigation}) {
         }
     }, [topLeft, bottomRight])
 
-    function readGrid(){
-      grid = []
-      for (let x = 0; x < 10; x++){
-        row = []
-        for (let y = 0; y < 10; y++){
-          row.push(Math.round(Math.random()*10))
-        }
-        grid.push(row)
-      }
+    async function readGrid(){
+      const croppedImage = await manipulateAsync(image, [{ resize: { width: Dimensions.get('window').width } }, { crop: { height: bottomRight[1]-topLeft[1],  originX: topLeft[0],  originY: topLeft[1], width: bottomRight[0]-topLeft[0] }} ], { base64: true })
+      // Make API call to read digits
+      const response = await fetch(url, {
+        method: 'POST', // GET, POST, PUT, DELETE etc.
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept-Encoding': 'gzip, deflate, br',
+          'Connection': 'keep-alive',
+        },
+        body: JSON.stringify({"img": croppedImage.base64.toString()})
+      });
+      var grid = await response.json();
+      grid = JSON.parse(grid);
+      grid = grid.message.slice(2,grid.message.length-2)
+      grid = JSON.parse(grid)
       navigation.navigate('Setter', {grid})
     }
 

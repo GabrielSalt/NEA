@@ -24,7 +24,7 @@ export default function Start({route, navigation}) {
           name='pen-tool'
           backgroundColor='#77AEE8'
           size={48}
-          onPress={() => navigation.navigate('Setter')}
+          onPress={() => navigation.navigate('Setter', {grid: new Array(81).fill(0)})}
         >
           Manual Mode
         </Icon.Button>

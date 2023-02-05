@@ -37,7 +37,7 @@ const takePicture = async () => {
       </View>
        <Button title="Take Picture" onPress={() => takePicture()} />
         {image && <Image source={{uri: image}} style={{flex:1}}/>}
-        {image && <Button title='Confirm' onPress={() => navigation.navigate('Confirm', {image})}/>}
+        {image && <Button title='Confirm Image' onPress={() => navigation.navigate('ConfirmImage', {image})}/>}
    </View>
   );
   }

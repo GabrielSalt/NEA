@@ -6,7 +6,7 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 
 import Start from './Start';
 import CameraScreen from './CameraScreen';
-import ConfirmScreen from './ConfirmScreen';
+import ConfirmImageScreen from './ConfirmImageScreen';
 import Setter from './Setter';
 import LoadScreen from './LoadScreen';
 import Solver from './Solver';
@@ -18,7 +18,7 @@ export default function HomeScreen({ route, navigation }) {
       <Stack.Navigator>
           <Stack.Screen name='Start' component={Start}/>
           <Stack.Screen name='Camera' component={CameraScreen}/>
-          <Stack.Screen name='Confirm' component={ConfirmScreen}/>
+          <Stack.Screen name='ConfirmImage' component={ConfirmImageScreen}/>
           <Stack.Screen name='Setter' component={Setter}/>
           <Stack.Screen name='Load' component={LoadScreen}/>
           <Stack.Screen name='Solver' component={Solver}/>
