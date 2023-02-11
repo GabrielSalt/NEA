@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { View, StyleSheet, Text, Dimensions, Pressable, Modal, TextInput } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, StyleSheet, Text, Dimensions, Pressable, Modal, TextInput, ActivityIndicator } from 'react-native';
 import {getBoxes, getCols,getPossibles,getRows,naked_singles,hidden_singles} from './SolveAlgo';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
@@ -10,6 +10,7 @@ export default function Solver ({ route, navigation }) {
   const [selectedNum, setselectedNum] = useState(null)
   const [modalVisible, setmodalVisible] = useState(false)
   const [text, setText] = useState('')
+  const [loading, setLoading] = useState(false)
 
   async function Save(){
     let keys = []
@@ -22,6 +23,23 @@ export default function Solver ({ route, navigation }) {
       await AsyncStorage.setItem(text, gridJson)
       navigation.navigate('Start')
     }
+  }
+
+  function SolvePuzzle(){
+    const Solve = fullSolve(grid)
+    const reverseSolve = fullSolve(grid,true)
+    if (JSON.stringify(Solve) == JSON.stringify(reverseSolve)){
+      if (Solve){
+        setGrid(Solve)
+      }
+      else {
+        alert('This puzzle has no solution')
+      }
+    }
+    else {
+      alert('This puzzle has no unique solution')
+    }
+    setLoading(false)
   }
 
   function fullSolve(grid, reverse=false){
@@ -144,12 +162,11 @@ export default function Solver ({ route, navigation }) {
   }
 
   return (
-    <View style={styles.container}>
+    <View style={styles.container}> 
     <Modal
         visible={modalVisible}
         transparent={true}
         onRequestClose={() => {
-          Alert.alert('Modal has been closed.');
           setmodalVisible(!modalVisible);
         }}>
         <View style={{flex: 1,justifyContent: 'center',alignItems: 'center',marginTop: 22}}>
@@ -163,8 +180,6 @@ export default function Solver ({ route, navigation }) {
           </View>
         </View>
       </Modal>  
-
-
       <View style={styles.gridContainer}>
       {grid.map((value, index) => (
           <Pressable style={[
@@ -202,7 +217,7 @@ export default function Solver ({ route, navigation }) {
             </Pressable>
           </View>
           <View style={styles.solverButton}>
-            <Pressable onPress={() => setGrid(fullSolve(grid))}>
+            <Pressable onPress={() => {SolvePuzzle()}}>
               <Text style={{fontSize:30, color:'#ffffff', textAlign: 'center'}}>Solve Fully</Text>
             </Pressable>
           </View>
@@ -212,10 +227,9 @@ export default function Solver ({ route, navigation }) {
             </Pressable>
           </View>
         </View>
-      </View>
-    </View>
-  );
-};
+      </View> 
+    </View>)
+}
 
 const styles = StyleSheet.create({
   container: {

@@ -1,30 +1,13 @@
 import pandas as pd
-import numpy as np
-
-import matplotlib.pyplot as plt
-import cv2 as cv
-from sklearn.model_selection import train_test_split
-from sklearn.metrics import confusion_matrix
-
 import keras
-from keras.models import Sequential
-from keras.datasets import mnist
-from keras.layers import Conv2D, Lambda, MaxPooling2D # convolution layers
+from keras.layers import Conv2D, MaxPooling2D # convolution layers
 from keras.layers import Dense, Dropout, Flatten # core layers
-
-from keras.preprocessing.image import ImageDataGenerator
-
-from keras.utils.np_utils import to_categorical
-
-
-import tensorflow as tf
+import numpy as np
 
 num_classes = 10
 input_shape = (28, 28, 1)
 
 path = 'mnist.npz'
-
-import numpy as np
 
 with np.load(path, allow_pickle=True) as f:
     x_train, y_train = f['x_train'], f['y_train']
@@ -71,5 +54,5 @@ score = model.evaluate(x_test, y_test, verbose=0)
 print("Test loss:", score[0])
 print("Test accuracy:", score[1])
 
-model.save('newmodel', save_format='tf')
+model.save('newmodel.h5', save_format='h5')
 
